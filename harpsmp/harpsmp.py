@@ -1,3 +1,21 @@
+# Copyright 2018 João Faria
+#
+# This file is part of harpsmp.
+#
+# harpsmp is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# harpsmp is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with harpsmp. If not, see <https://www.gnu.org/licenses/>.
+
+
 import os
 import re
 from glob import glob
@@ -90,25 +108,21 @@ class RVseries:
         ax.errorbar(self.time, self.vrad, self.error, **self.plot_kwargs)
         ax.set(title=f'HARPS RV observations of {self.star}', 
                xlabel='Time [MJD]', ylabel=f'RV ({self.units})')
-        fig.show()
     
     def plot_fwhm(self):
         fig, ax = plt.subplots(1, 1)
         ax.errorbar(self.time, self.fwhm, **self.plot_kwargs)
         ax.set(title=f'HARPS FWHM observations of {self.star}', 
                xlabel='Time [MJD]', ylabel=f'FWHM ({self.units})')
-        fig.show()
 
     def plot_bis(self):
         fig, ax = plt.subplots(1, 1)
         ax.errorbar(self.time, self.bis, **self.plot_kwargs)
         ax.set(title=f'HARPS BIS observations of {self.star}', 
                xlabel='Time [MJD]', ylabel=f'BIS ({self.units})')
-        fig.show()
 
     def plot_contrast(self):
         fig, ax = plt.subplots(1, 1)
         ax.errorbar(self.time, self.contrast, **self.plot_kwargs)
         ax.set(title=f'HARPS CCF contrast observations of {self.star}', 
                xlabel='Time [MJD]', ylabel='contrast (%)')
-        fig.show()    
