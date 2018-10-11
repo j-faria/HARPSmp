@@ -1,24 +1,39 @@
 import os
 import re
 from glob import glob
+import urllib.request
+import requests
 import numpy as np 
 import matplotlib.pyplot as plt
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 data_path = os.path.join(this_dir, '..', 'data')
 
+# def get_star_name_from_path(full_path):
+#     """ Return the name of the star (works for standard HARPS filenames) """
+#     bn = os.path.basename(full_path)
+#     pattern = '|'.join(['HD\d+', 'HIP\d+', 'HR\d+', 'BD-\d+', 'CD-\d+',
+#                         'NGC\d+No\d+', 'GJ\d+', 'Gl\d+'])
+#     return re.findall(pattern, bn)[0]
 
-def get_star_name_from_path(full_path):
-    """ Return the name of the star (works for standard HARPS filenames) """
-    bn = os.path.basename(full_path)
-    pattern = '|'.join(['HD\d+', 'HIP\d+', 'HR\d+', 'BD-\d+', 'CD-\d+',
-                        'NGC\d+No\d+', 'GJ\d+', 'Gl\d+'])
-    return re.findall(pattern, bn)[0]
+
+def url_is_alive(url):
+    """ Checks that a given URL is reachable. """
+    request = urllib.request.Request(url)
+    request.get_method = lambda: 'HEAD'
+    try:
+        urllib.request.urlopen(request)
+        return True
+    except urllib.request.HTTPError:
+        return False
+
+def get_file(url):
+    """ Get the data file from a github url. """
+    result = requests.get(url)
+    return result.text.split('\n')
 
 
-available_stars = list(map(get_star_name_from_path, 
-                          glob(os.path.join(data_path, '*'))
-                          ))
+github_url = 'https://raw.githubusercontent.com/j-faria/HARPSmp/master/data/%s_harps.rdb'
 
 
 class RVseries:
@@ -28,12 +43,16 @@ class RVseries:
         return f"HARPS RVs of {self.star}"
 
     def __init__(self, star, ms=True, verbose=False):
-        assert star in available_stars, f'Data for {star} is not available'
+        if not url_is_alive(github_url % star):
+            print(f'Data for {star} is not available')
+            return
 
         self.star = star
-        filename = f'{data_path}/{star}_harps.rdb'
+        filename = f'{star}_harps.rdb'
+        fileurl = get_file(github_url % star)
         if verbose: print(f'Reading file "{filename}"')
-        self.data = np.loadtxt(filename, unpack=True, skiprows=2)
+
+        self.data = np.genfromtxt(fileurl, unpack=True, skip_header=2)
         self.units = 'km/s'
 
         self.time = self.data[0]
