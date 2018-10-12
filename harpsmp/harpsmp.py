@@ -51,7 +51,8 @@ def get_file(url):
     return result.text.split('\n')
 
 
-github_url = 'https://raw.githubusercontent.com/j-faria/HARPSmp/master/data/%s_harps.rdb'
+github_url = 'https://raw.githubusercontent.com/j-faria/HARPSmp/master/'\
+             'data/%s_harps.rdb'
 
 
 class RVseries:
@@ -62,8 +63,7 @@ class RVseries:
 
     def __init__(self, star, ms=True, verbose=False):
         if not url_is_alive(github_url % star):
-            print(f'Data for {star} is not available')
-            return
+            raise ValueError(f'Data for {star} is not available')
 
         self.star = star
         filename = f'{star}_harps.rdb'
@@ -126,3 +126,26 @@ class RVseries:
         ax.errorbar(self.time, self.contrast, **self.plot_kwargs)
         ax.set(title=f'HARPS CCF contrast observations of {self.star}', 
                xlabel='Time [MJD]', ylabel='contrast (%)')
+
+
+
+github_results_url = 'https://raw.githubusercontent.com/j-faria/HARPSmp/master/'\
+                     'results/%s.pickle'
+
+try:
+    import pykima
+    pykima_available = True
+except ImportError:
+    pykima_available = False
+
+class Analysis:
+    """ A simple class to hold the results of a kima analysis """
+
+    def __init__(self, star, verbose=False):
+        if not pykima_available:
+            raise ValueError('You need to install pykima to load the results')
+            
+        if not url_is_alive(github_results_url % star):
+            raise ValueError(f'Results for {star} are not yet available')
+
+        self.star = star

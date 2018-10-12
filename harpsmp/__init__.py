@@ -16,4 +16,4 @@
 # along with harpsmp. If not, see <https://www.gnu.org/licenses/>.
 
 
-from .harpsmp import RVseries
+from .harpsmp import RVseries, Analysis
