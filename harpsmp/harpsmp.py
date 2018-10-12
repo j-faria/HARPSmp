@@ -21,6 +21,7 @@ import re
 from glob import glob
 import urllib.request
 import requests
+import shutil
 import numpy as np 
 import matplotlib.pyplot as plt
 
@@ -141,11 +142,25 @@ except ImportError:
 class Analysis:
     """ A simple class to hold the results of a kima analysis """
 
-    def __init__(self, star, verbose=False):
+    def __init__(self, star, verbose=False, keep_local_file=False):
         if not pykima_available:
             raise ValueError('You need to install pykima to load the results')
-            
+
         if not url_is_alive(github_results_url % star):
             raise ValueError(f'Results for {star} are not yet available')
 
         self.star = star
+
+        # download the pickle file (maybe temporarily)
+        url = github_results_url % star
+        response = requests.get(url, stream=True)
+        localfile = f'{star}.pickle'
+        with open(localfile, 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        del response
+
+        # load it
+        self.res = pykima.KimaResults.load(localfile)
+        # delete it
+        if not keep_local_file:
+            os.remove(localfile)
